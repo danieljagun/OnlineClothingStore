@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Item = require('../models/Item'); // Ensure this path correctly points to your Item model
+const Item = require('../models/Item');
+const authenticate = require('../middleware/authenticate');
+const isAdmin = require('../middleware/isAdmin');
 
-// Get all items
+// Get all items - Public
 router.get('/', async (req, res) => {
     try {
         const items = await Item.find({});
@@ -12,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get a single item by ID
+// Get a single item by ID - Public
 router.get('/:id', async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
@@ -25,8 +27,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Create a new item
-router.post('/', async (req, res) => {
+// Create a new item - Admin
+router.post('/', [authenticate, isAdmin], async (req, res) => {
     const { title, manufacturer, price, category, image, stock } = req.body;
     try {
         const newItem = new Item({
@@ -34,7 +36,7 @@ router.post('/', async (req, res) => {
             manufacturer,
             price,
             category,
-            image, // Assume you're receiving a URL as a string
+            image,
             stock
         });
         const savedItem = await newItem.save();
@@ -44,8 +46,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Update an item
-router.put('/:id', async (req, res) => {
+// Update an item - Admin
+router.put('/:id', [authenticate, isAdmin], async (req, res) => {
     const { title, manufacturer, price, category, image, stock } = req.body;
     try {
         const updatedItem = await Item.findByIdAndUpdate(req.params.id, {
@@ -55,15 +57,15 @@ router.put('/:id', async (req, res) => {
             category,
             image,
             stock
-        }, { new: true }); // { new: true } returns the updated document
+        }, { new: true });
         res.json(updatedItem);
     } catch (error) {
         res.status(400).json({ message: "Error updating item" });
     }
 });
 
-// Delete an item
-router.delete('/:id', async (req, res) => {
+// Delete an item - Admin
+router.delete('/:id', [authenticate, isAdmin], async (req, res) => {
     try {
         await Item.findByIdAndDelete(req.params.id);
         res.json({ message: "Item deleted successfully" });

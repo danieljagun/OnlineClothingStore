@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     shippingAddress: String,
     paymentMethod: String,
-    isAdmin: { type: Boolean, default: false }, // Default value is false for regular users
+    isAdmin: { type: Boolean, default: false }, // Default value is false for regular users, admin users is true
 });
 
 const User = mongoose.model('User', userSchema);
+
+module.exports = User;

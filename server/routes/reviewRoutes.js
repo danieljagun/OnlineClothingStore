@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Review = require('../models/Review');
+const authenticate = require("../middleware/authenticate");
 
-// Get reviews for an item
+// Get reviews for an item - Public
 router.get('/item/:itemId', async (req, res) => {
     try {
         const reviews = await Review.find({ item: req.params.itemId }).populate('user', 'username');
@@ -12,8 +13,8 @@ router.get('/item/:itemId', async (req, res) => {
     }
 });
 
-// Post a review
-router.post('/', async (req, res) => {
+// Post a review - Public (logged in)
+router.post('/', authenticate, async (req, res) => {
     const { item, user, rating, comment } = req.body;
     try {
         const newReview = new Review({

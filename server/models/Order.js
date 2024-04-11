@@ -8,7 +8,9 @@ const orderSchema = new mongoose.Schema({
     }],
     status: { type: String, default: 'pending' }, // Example status values: pending, completed, shipped, etc.
     createdAt: { type: Date, default: Date.now },
-    // Additional fields like totalCost can be computed or stored
+
 });
 
 const Order = mongoose.model('Order', orderSchema);
+
+module.exports = Order;

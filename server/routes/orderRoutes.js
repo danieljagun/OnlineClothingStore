@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const authenticate = require("../middleware/authenticate");
+const isAdmin = require('../middleware/isAdmin');
 
-// Get all orders
-router.get('/', async (req, res) => {
+// Get all orders - Public (logged in)
+router.get('/', authenticate, async (req, res) => {
     try {
         const orders = await Order.find({}).populate('user items.item');
         res.json(orders);
@@ -12,11 +14,11 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Create a new order
-router.post('/', async (req, res) => {
-    const { user, items } = req.body; // Assuming `items` is an array of { item: ObjectId, quantity: Number }
+// Create a new order - Admin
+router.post('/', [authenticate, isAdmin], async (req, res) => {
+    const { user, items } = req.body;
 
-    // First, verify stock levels and update them accordingly
+    // Check stock levels and update them accordingly
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
