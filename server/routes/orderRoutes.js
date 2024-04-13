@@ -3,14 +3,15 @@ const router = express.Router();
 const Order = require('../models/Order');
 const authenticate = require("../middleware/authenticate");
 const isAdmin = require('../middleware/isAdmin');
+const responseFactory = require('../config/responseFactory');
 
 // Get all orders - Public (logged in)
 router.get('/', authenticate, async (req, res) => {
     try {
         const orders = await Order.find({}).populate('user items.item');
-        res.json(orders);
+        res.json(responseFactory.success(orders, "Orders fetched successfully"));
     } catch (error) {
-        res.status(500).json({ message: "Error fetching orders" });
+        res.status(500).json(responseFactory.error("Error fetching orders", 500));
     }
 });
 
@@ -36,10 +37,10 @@ router.post('/', [authenticate, isAdmin], async (req, res) => {
         const savedOrder = await newOrder.save({ session });
 
         await session.commitTransaction();
-        res.status(201).json(savedOrder);
+        res.status(201).json(responseFactory.success(savedOrder, "Order created successfully"));
     } catch (error) {
         await session.abortTransaction();
-        res.status(400).json({ message: "Error creating order: " + error.message });
+        res.status(400).json(responseFactory.error("Error creating order: ${error.message}", 400));
     } finally {
         session.endSession();
     }

@@ -4,14 +4,13 @@ const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
+const connectDatabase = require('./config/database');
+
+// MongoDB connection
+connectDatabase();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB...'))
-    .catch(err => console.error('Could not connect to MongoDB:', err));
 
 // Import routes
 const itemRoutes = require('./routes/itemRoutes');

@@ -2,14 +2,16 @@ const express = require('express');
 const router = express.Router();
 const Review = require('../models/Review');
 const authenticate = require("../middleware/authenticate");
+const responseFactory = require('../config/responseFactory');
 
 // Get reviews for an item - Public
 router.get('/item/:itemId', async (req, res) => {
     try {
         const reviews = await Review.find({ item: req.params.itemId }).populate('user', 'username');
-        res.json(reviews);
+        res.json(responseFactory.success(reviews, "Reviews fetched successfully"));
+
     } catch (error) {
-        res.status(500).json({ message: "Error fetching reviews" });
+        res.status(500).json(responseFactory.error("Error fetching reviews", 500));
     }
 });
 
@@ -24,9 +26,9 @@ router.post('/', authenticate, async (req, res) => {
             comment
         });
         const savedReview = await newReview.save();
-        res.status(201).json(savedReview);
+        res.status(201).json(responseFactory.success(savedReview, "Review posted successfully"));
     } catch (error) {
-        res.status(400).json({ message: "Error posting review" });
+        res.status(400).json(responseFactory.error("Error posting review"));
     }
 });
 

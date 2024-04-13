@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken'); // Import jsonwebtoken
+const jwt = require('jsonwebtoken');
+const responseFactory = require('../config/responseFactory');
 
 // Register a new user - Public
 router.post('/register', async (req, res) => {
@@ -29,14 +30,13 @@ router.post('/register', async (req, res) => {
         );
 
         // Send back the token and user info (excluding password)
-        res.status(201).json({
-            message: "User registered successfully",
-            token, // Include the token in the response
+        res.status(201).json(responseFactory.success({
+            token,
             user: { ...savedUser._doc, password: undefined }
-        });
+        },"User registered successfully"));
     } catch (error) {
         console.error(error);
-        res.status(400).json({ message: "Error registering user" });
+        res.status(400).json(responseFactory.error("Error registering user"));
     }
 });
 
@@ -46,12 +46,12 @@ router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ username });
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json(responseFactory.error("User not found", 404));
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: "Invalid credentials" });
+            return res.status(400).json(responseFactory.error("Invalid credentials"));
         }
 
         // Generate a JWT token upon successful login
@@ -62,11 +62,10 @@ router.post('/login', async (req, res) => {
         );
 
         // Send back the token and user info (excluding password)
-        res.json({
-            message: "User logged in successfully",
-            token, // Include the token in the response
+        res.json(responseFactory.success({
+            token,
             user: { ...user._doc, password: undefined }
-        });
+        }, "User logged in successfully"));
     } catch (error) {
         res.status(500).json({ message: "Error logging in" });
     }

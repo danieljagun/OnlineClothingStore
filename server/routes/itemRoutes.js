@@ -3,14 +3,15 @@ const router = express.Router();
 const Item = require('../models/Item');
 const authenticate = require('../middleware/authenticate');
 const isAdmin = require('../middleware/isAdmin');
+const responseFactory = require('../config/responseFactory');
 
 // Get all items - Public
 router.get('/', async (req, res) => {
     try {
         const items = await Item.find({});
-        res.json(items);
+        res.json(responseFactory.success(items));
     } catch (error) {
-        res.status(500).json({ message: "Error fetching items" });
+        res.status(500).json(responseFactory.error("Error fetching items", 500));
     }
 });
 
@@ -19,11 +20,11 @@ router.get('/:id', async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
         if (!item) {
-            return res.status(404).json({ message: "Item not found" });
+            return res.status(404).json(responseFactory.error("Item not found", 404));
         }
-        res.json(item);
+        res.json(responseFactory.success(item));
     } catch (error) {
-        res.status(500).json({ message: "Error fetching item" });
+        res.status(500).json(responseFactory.error("Error fetching item", 500));
     }
 });
 
@@ -40,9 +41,9 @@ router.post('/', [authenticate, isAdmin], async (req, res) => {
             stock
         });
         const savedItem = await newItem.save();
-        res.status(201).json(savedItem);
+        res.status(201).json(responseFactory.success(savedItem, "Item created successfully"));
     } catch (error) {
-        res.status(400).json({ message: "Error creating item" });
+        res.status(400).json(responseFactory.error("Error creating item"));
     }
 });
 
@@ -58,9 +59,9 @@ router.put('/:id', [authenticate, isAdmin], async (req, res) => {
             image,
             stock
         }, { new: true });
-        res.json(updatedItem);
+        res.json(responseFactory.success(updatedItem, "Item updated successfully"));
     } catch (error) {
-        res.status(400).json({ message: "Error updating item" });
+        res.status(400).json(responseFactory.error("Error updating item"));
     }
 });
 
@@ -68,9 +69,9 @@ router.put('/:id', [authenticate, isAdmin], async (req, res) => {
 router.delete('/:id', [authenticate, isAdmin], async (req, res) => {
     try {
         await Item.findByIdAndDelete(req.params.id);
-        res.json({ message: "Item deleted successfully" });
+        res.json(responseFactory.success({}, "Item deleted successfully"));
     } catch (error) {
-        res.status(500).json({ message: "Error deleting item" });
+        res.status(500).json(responseFactory.error("Error deleting item", 500));
     }
 });
 
