@@ -1,0 +1,8 @@
+/* Adjust this if .header is the actual class used in the Header component */
+.header {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 60px;
+}

@@ -8,7 +8,25 @@ const responseFactory = require('../config/responseFactory');
 // Get all items - Public
 router.get('/', async (req, res) => {
     try {
-        const items = await Item.find({});
+        const { category, manufacturer, title, sort } = req.query;
+        let query = {};
+        if (category) {
+            query.category = category;
+        }
+        if (manufacturer) {
+            query.manufacturer = manufacturer;
+        }
+        if (title) {
+            query.title = { $regex: title, $options: 'i' };
+        }
+
+        let sortOptions = {};
+        if (sort) {
+            const sortKey = sort.startsWith('-') ? sort.slice(1) : sort;
+            sortOptions[sortKey] = sort.startsWith('-') ? -1 : 1;
+        }
+
+        const items = await Item.find(query).sort(sortOptions);
         res.json(responseFactory.success(items));
     } catch (error) {
         res.status(500).json(responseFactory.error("Error fetching items", 500));

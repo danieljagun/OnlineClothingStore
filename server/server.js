@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
 const connectDatabase = require('./config/database');
@@ -11,6 +12,11 @@ connectDatabase();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Use CORS
+app.use(cors({
+    origin: 'http://localhost:3000' // Allow requests from this origin only
+}));
 
 // Import routes
 const itemRoutes = require('./routes/itemRoutes');
