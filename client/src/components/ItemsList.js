@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchItems } from '../services/apiService';
+import { fetchItems } from '../services/ApiService';
 import { useAuth } from '../context/authContext';
 import { useCart } from '../context/CartContext'; // Import useCart
 

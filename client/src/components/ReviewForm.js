@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { postReview } from '../services/apiService';
+import { postReview } from '../services/ApiService';
 import { useAuth } from '../context/authContext';
 
 function ReviewForm({ itemId }) {

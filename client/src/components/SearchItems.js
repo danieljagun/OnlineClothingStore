@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { fetchItems } from '../services/apiService';
+import { fetchItems } from '../services/ApiService';
 
 function SearchItems() {
     const [searchParams, setSearchParams] = useState({

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchReviewsForItem } from '../services/apiService';
+import { fetchReviewsForItem } from '../services/ApiService';
 
 function ReviewsDisplay({ itemId }) {
     const [reviews, setReviews] = useState([]);

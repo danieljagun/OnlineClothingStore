@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loginUser } from '../services/apiService';
+import { loginUser } from '../services/ApiService';
 import { useAuth } from '../context/authContext';  // Import useAuth hook
 import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation after login
 

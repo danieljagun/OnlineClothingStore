@@ -2,64 +2,39 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+const initializeAuthState = () => {
     const getUserFromStorage = () => {
         const userString = localStorage.getItem('user');
-        if (userString) {
-            try {
-                return JSON.parse(userString);
-            } catch (e) {
-                console.error("Parsing error on user from localStorage", e);
-                return null; // Default to null if parsing fails
-            }
-        }
-        return null;
+        return userString ? JSON.parse(userString) : null;
     };
 
-    const [authState, setAuthState] = useState({
+    return {
         token: localStorage.getItem('token') || null,
-        isAuthenticated: false,
+        isAuthenticated: !!localStorage.getItem('token'),
         user: getUserFromStorage()
-    });
+    };
+};
+
+export const AuthProvider = ({ children }) => {
+    const [authState, setAuthState] = useState(initializeAuthState);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const user = getUserFromStorage();
-
-        if (token && user) {
-            setAuthState(prev => ({
-                ...prev,
-                isAuthenticated: true,
-                user
-            }));
-        }
+        // Effect to handle state updates based on localStorage changes if needed
     }, []);
 
     const login = (token, user) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
-        setAuthState({
-            token,
-            isAuthenticated: true,
-            user
-        });
+        setAuthState({ token, isAuthenticated: true, user });
     };
 
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        setAuthState({
-            token: null,
-            isAuthenticated: false,
-            user: null
-        });
+        setAuthState({ token: null, isAuthenticated: false, user: null });
     };
 
-    return (
-        <AuthContext.Provider value={{ ...authState, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={{ ...authState, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
