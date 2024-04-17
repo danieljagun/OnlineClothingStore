@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/authContext'; // Adjust the path as necessary
-import './NavBar.css'; // Make sure to create a corresponding CSS file
+import { useAuth } from '../context/authContext';
+import './NavBar.css';
 
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { isAuthenticated, logout } = useAuth(); // Destructure isAuthenticated and logout from auth context
+    const { user, isAuthenticated, logout } = useAuth();
 
     const handleLogout = () => {
         logout();
@@ -25,6 +25,16 @@ function NavBar() {
                 <li className={location.pathname === '/shopping-cart' ? 'nav-item active' : 'nav-item'}>
                     <Link to="/shopping-cart">Shopping Cart</Link>
                 </li>
+                {isAuthenticated && user.isAdmin && (
+                    <>
+                        <li className={location.pathname === '/admin' ? 'nav-item active' : 'nav-item'}>
+                            <Link to="/admin">Admin Dashboard</Link>
+                        </li>
+                        <li className={location.pathname === '/add-item' ? 'nav-item active' : 'nav-item'}>
+                            <Link to="/add-item">Add Item</Link>
+                        </li>
+                    </>
+                )}
                 {isAuthenticated ? (
                     <li className="nav-item">
                         <button onClick={handleLogout} className="nav-link-button">Logout</button>

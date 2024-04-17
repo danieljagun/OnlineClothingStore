@@ -6,9 +6,15 @@ const orderSchema = new mongoose.Schema({
         item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true },
         quantity: { type: Number, required: true },
     }],
-    status: { type: String, default: 'pending' }, // Example status values: pending, completed, shipped, etc.
-    createdAt: { type: Date, default: Date.now },
-
+    paymentDetails: {
+        cardNumber: String,
+        expirationDate: Date,
+        cvv: String,
+    },
+    shippingAddress: String,
+    email: String,
+    status: { type: String, default: 'pending' },
+    createdAt: { type: Date, default: Date.now }
 });
 
 const Order = mongoose.model('Order', orderSchema);

@@ -5,7 +5,7 @@ const itemSchema = new mongoose.Schema({
     manufacturer: { type: String, required: true },
     price: { type: Number, required: true },
     category: { type: String, required: true },
-    image: String, // URL to the image
+    image: String,
     stock: { type: Number, required: true, default: 0 }
 
 });

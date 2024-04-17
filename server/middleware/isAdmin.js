@@ -9,7 +9,7 @@ const isAdmin = async (req, res, next) => {
         if (!user) return res.status(404).json({ message: "User not found." });
 
         if (user.isAdmin) {
-            next(); // The user is an admin, proceed to the next middleware or route handler
+            next(); // If the user is an admin, proceed to the next middleware or route handler
         } else {
             res.status(403).json({ message: "Access denied. Not authorized as admin." });
         }

@@ -1,48 +1,105 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const { Types: { ObjectId } } = require('mongoose');
 const Order = require('../models/Order');
 const authenticate = require("../middleware/authenticate");
-const isAdmin = require('../middleware/isAdmin');
 const responseFactory = require('../config/responseFactory');
+const Mailjet = require('node-mailjet');
+const { validatePaymentDetails } = require('../config/validation');
+const isAdmin = require("../middleware/isAdmin");
 
-// Get all orders - Public (logged in)
-router.get('/', authenticate, async (req, res) => {
+// Initialize Mailjet client
+const mailjet = Mailjet.apiConnect(
+    process.env.MAILJET_API_KEY,
+    process.env.MAILJET_API_SECRET
+);
+
+const isValidObjectId = (id) => {
+    const { ObjectId } = require('mongoose').Types;
+    return ObjectId.isValid(id);
+};
+
+router.get('/user/:userId', authenticate, isAdmin, async (req, res) => {
     try {
-        const orders = await Order.find({}).populate('user items.item');
-        res.json(responseFactory.success(orders, "Orders fetched successfully"));
+        const orders = await Order.find({ user: req.params.userId });
+        res.json(orders);
     } catch (error) {
-        res.status(500).json(responseFactory.error("Error fetching orders", 500));
+        res.status(500).json({ message: "Error fetching orders for user." });
     }
 });
 
-// Create a new order - Admin
-router.post('/', [authenticate, isAdmin], async (req, res) => {
-    const { user, items } = req.body;
+// Create a new order - Logged in users
+router.post('/', async (req, res) => {
+    console.log("Received Order Data:", req.body);
 
-    // Check stock levels and update them accordingly
-    const session = await mongoose.startSession();
+    const { items, paymentDetails: nestedPaymentDetails, shippingAddress, email, userId } = req.body;
+    const { paymentDetails } = nestedPaymentDetails;
+
+    if (!validatePaymentDetails(paymentDetails)) {
+        console.log("Invalid payment details:", paymentDetails);
+        return res.status(400).json(responseFactory.error("Invalid payment details"));
+    }
+
     try {
-        session.startTransaction();
-        for (const orderItem of items) {
-            const item = await Item.findById(orderItem.item).session(session);
-            if (!item || item.stock < orderItem.quantity) {
-                throw new Error('Item not available');
-            }
-            item.stock -= orderItem.quantity;
-            await item.save({ session });
+        if (!userId || !isValidObjectId(userId)) {
+            console.log("Invalid or missing userId:", userId);
+            throw new Error("Invalid or missing userId");
         }
 
-        // If stock levels are sufficient, save the order
-        const newOrder = new Order({ user, items });
-        const savedOrder = await newOrder.save({ session });
+        const order = new Order({
+            user: new ObjectId(userId),
+            items: items.map(item => ({
+                item: new ObjectId(item.item),
+                quantity: item.quantity
+            })),
+            paymentDetails,
+            shippingAddress,
+            email,
+            status: 'pending'
+        });
 
-        await session.commitTransaction();
+        const savedOrder = await order.save();
         res.status(201).json(responseFactory.success(savedOrder, "Order created successfully"));
     } catch (error) {
-        await session.abortTransaction();
-        res.status(400).json(responseFactory.error("Error creating order: ${error.message}", 400));
-    } finally {
-        session.endSession();
+        console.error("Order processing error:", error);
+        res.status(400).json(responseFactory.error(`Error creating order: ${error.message}`, 400));
+    }
+});
+
+//Test Endpoint
+router.post('/test', async (req, res) => {
+    try {
+        const testOrder = new Order({
+            user: new ObjectId('5f8d04b5db93c74aab4224b7'),
+            items: [{
+                item: new ObjectId('5f8d04b5db93c74aab4224b8'),
+                quantity: 1
+            }],
+            paymentDetails: {
+                cardNumber: "1234567890123456",
+                expirationDate: new Date(2023, 0, 1),
+                cvv: "123"
+            },
+            shippingAddress: "123 Test St",
+            email: "test@example.com",
+            status: 'pending'
+        });
+        const savedOrder = await testOrder.save();
+        res.json({ message: "Test order created successfully", order: savedOrder });
+    } catch (error) {
+        console.error("Failed to create test order:", error);
+        res.status(400).json({ message: "Failed to create test order", error: error.message });
+    }
+});
+
+// Get all orders - Admin only
+router.get('/', authenticate, isAdmin, async (req, res) => {
+    try {
+        const orders = await Order.find({});
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching orders." });
     }
 });
 

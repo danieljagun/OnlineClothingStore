@@ -7,7 +7,7 @@ function ReviewForm({ itemId }) {
         rating: '',
         comment: ''
     });
-    const { user, token } = useAuth(); // Access user and token from Auth context
+    const { user, token } = useAuth();
     const [error, setError] = useState('');
 
     const handleChange = (e) => {
@@ -23,7 +23,7 @@ function ReviewForm({ itemId }) {
         try {
             await postReview({ ...reviewData, item: itemId, user: user._id }, token);
             alert('Review submitted successfully!');
-            setReviewData({ rating: '', comment: '' }); // Reset form after submission
+            setReviewData({ rating: '', comment: '' });
         } catch (error) {
             setError('Failed to submit review: ' + error.message);
             console.error('Error submitting review:', error);

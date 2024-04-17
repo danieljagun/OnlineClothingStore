@@ -1,22 +1,15 @@
 import React from 'react';
-import { Route, Navigate } from 'react-router-dom'; // Import Navigate instead of Redirect
+import { Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 
-const AdminRoute = ({ children, ...rest }) => {
-    const { isAuthenticated, user } = useAuth(); // Get user info from context
+const AdminRoute = ({ children }) => {
+    const { user } = useAuth();
 
-    return (
-        <Route
-            {...rest}
-            element={
-                isAuthenticated && user.isAdmin ? (
-                    children
-                ) : (
-                    <Navigate to="/login" replace /> // Use Navigate for redirection
-                )
-            }
-        />
-    );
+    if (!user || !user.isAdmin) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
 };
 
 export default AdminRoute;

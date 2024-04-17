@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { fetchItems } from '../services/ApiService';
 import { useAuth } from '../context/authContext';
-import { useCart } from '../context/CartContext'; // Import useCart
+import { useCart } from '../context/CartContext';
+import './ItemList.css';
 
 function ItemList({ variant }) {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { isAuthenticated } = useAuth();
-    const { addItem } = useCart(); // Use addItem from cart context
+    const {isAuthenticated} = useAuth();
+    const {addItem} = useCart();
 
     useEffect(() => {
         setLoading(true);
@@ -36,18 +37,20 @@ function ItemList({ variant }) {
     if (error) return <p>Error: {error}</p>;
 
     return (
-        <div>
-            <h1>{variant === 'product' ? 'Product List' : 'Items Available'}</h1>
+        <>
+            <h1 className="items-title">{variant === 'product' ? 'Product List' : 'Items Available'}</h1>
+            <div className="item-container">
             {Array.isArray(items) && items.map(item => (
-                <div key={item._id} style={variant === 'product' ? { listStyleType: 'none' } : null}>
+                <div key={item._id} className="item-card">
                     <h3>{item.title}</h3>
-                    <img src={item.image} alt={item.title} style={{ width: '100px', height: '100px' }} />
+                    <img src={item.image} alt={item.title}/>
                     <p>Manufacturer: {item.manufacturer}</p>
                     <p>Price: ${item.price}</p>
                     <button onClick={() => handleAddToCart(item)}>Add to Cart</button>
                 </div>
             ))}
         </div>
+        </>
     );
 }
 

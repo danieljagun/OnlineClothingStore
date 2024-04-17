@@ -10,7 +10,7 @@ function ReviewsDisplay({ itemId }) {
         setLoading(true);
         fetchReviewsForItem(itemId)
             .then(response => {
-                setReviews(response.data.data); // Assuming the response format
+                setReviews(response.data.data);
                 setLoading(false);
             })
             .catch(error => {
@@ -30,7 +30,7 @@ function ReviewsDisplay({ itemId }) {
                     <div key={review._id}>
                         <p>Rating: {review.rating}</p>
                         <p>{review.comment}</p>
-                        <p>By: {review.user.username}</p>  // Assuming you have user info in the review
+                        <p>By: {review.user.username}</p>
                     </div>
                 ))
             ) : <p>No reviews yet.</p>}

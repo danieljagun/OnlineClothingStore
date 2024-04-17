@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
@@ -6,7 +7,8 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     shippingAddress: String,
     paymentMethod: String,
-    isAdmin: { type: Boolean, default: false }, // Default value is false for regular users, admin users is true
+    isAdmin: { type: Boolean, default: false },
+    orders: [{ type: Schema.Types.ObjectId, ref: 'Order' }]
 });
 
 const User = mongoose.model('User', userSchema);

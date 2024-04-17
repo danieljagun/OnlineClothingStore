@@ -18,7 +18,7 @@ function AddItem() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('token'); // Assume admin token is stored
+        const token = localStorage.getItem('token');
         createItem(itemData, token)
             .then(response => {
                 alert('Item added successfully!');

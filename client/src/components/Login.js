@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { loginUser } from '../services/ApiService';
-import { useAuth } from '../context/authContext';  // Import useAuth hook
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation after login
+import { useAuth } from '../context/authContext';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
-    const { login } = useAuth();  // Destructure login function from context
-    const navigate = useNavigate();  // Get the navigate function to redirect after login
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogin = (event) => {
         event.preventDefault();
         loginUser(credentials)
             .then(response => {
-                login(response.data.token, response.data.user);  // Update auth context
-                navigate('/');  // Redirect to home page or dashboard
+                console.log('Login response:', response.data);
+                if (response.data.data.token && response.data.data.user) {
+                    login(response.data.data.token, response.data.data.user);
+                    navigate('/');
+                } else {
+                    throw new Error("Login response does not contain expected token and user data");
+                }
             })
             .catch(error => {
                 setError('Failed to login: ' + error.message);

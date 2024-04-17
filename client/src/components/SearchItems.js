@@ -21,10 +21,9 @@ function SearchItems() {
         event.preventDefault();
         setLoading(true);
         try {
-            // Pass searchParams as arguments to fetchItems
+
             const response = await fetchItems(searchParams);
-            // Make sure you access the 'data' property from the response correctly
-            setItems(response.data.data); // Assuming the response structure includes data encapsulated in a 'data' field
+            setItems(response.data.data);
             setLoading(false);
         } catch (error) {
             setError('Failed to fetch items: ' + error.message);
