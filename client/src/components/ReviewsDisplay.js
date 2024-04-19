@@ -27,10 +27,10 @@ function ReviewsDisplay({ itemId }) {
             <h2>Reviews</h2>
             {reviews.length > 0 ? (
                 reviews.map(review => (
-                    <div key={review._id}>
-                        <p>Rating: {review.rating}</p>
-                        <p>{review.comment}</p>
-                        <p>By: {review.user.username}</p>
+                    <div key={review._id} style={{ marginBottom: '20px', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
+                        <p><strong>Rating:</strong> {review.rating} <span style={{ fontSize: '14px', color: '#666' }}>{Array(review.rating).fill('★').join('')}</span></p>
+                        <p style={{ fontStyle: 'italic' }}>{review.comment}</p>
+                        <p style={{ color: '#007BFF' }}>By: {review.user?.username}</p>
                     </div>
                 ))
             ) : <p>No reviews yet.</p>}

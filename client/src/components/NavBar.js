@@ -25,7 +25,7 @@ function NavBar() {
                 <li className={location.pathname === '/shopping-cart' ? 'nav-item active' : 'nav-item'}>
                     <Link to="/shopping-cart">Shopping Cart</Link>
                 </li>
-                {isAuthenticated && user.isAdmin && (
+                {isAuthenticated && user && user.isAdmin && (
                     <>
                         <li className={location.pathname === '/admin' ? 'nav-item active' : 'nav-item'}>
                             <Link to="/admin">Admin Dashboard</Link>

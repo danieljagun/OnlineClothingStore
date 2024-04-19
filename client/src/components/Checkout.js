@@ -21,6 +21,11 @@ function Checkout() {
     };
 
     const handleOrderSubmission = async (paymentDetails) => {
+        if (!user || !user._id) {
+            console.error('User information is missing.');
+            return;
+        }
+
         const orderData = {
             items: cart.items.map(({ _id, quantity }) => ({ item: _id, quantity })),
             paymentDetails,
@@ -30,7 +35,7 @@ function Checkout() {
         };
 
         try {
-            const response = await createOrder(orderData);
+            const response = await createOrder(orderData, user.token); // Pass user token to createOrder function
             navigate('/confirmation', { state: { orderDetails: response.data } });
             clearCart();
         } catch (error) {

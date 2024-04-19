@@ -3,17 +3,32 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+    const getInitialUser = () => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                return JSON.parse(storedUser);
+            } catch (error) {
+                console.error('Failed to parse user data:', error);
+                return null;
+            }
+        }
+        return null;
+    };
+
+    const getInitialToken = () => localStorage.getItem('token');
+
     const [authState, setAuthState] = useState({
-        token: localStorage.getItem('token'),
-        user: JSON.parse(localStorage.getItem('user')),
-        isAuthenticated: Boolean(localStorage.getItem('token')),
+        token: getInitialToken(),
+        user: getInitialUser(),
+        isAuthenticated: Boolean(getInitialToken()),
     });
 
     useEffect(() => {
         const handleStorageChange = (event) => {
-            if (event.key === 'token') {
-                const newToken = localStorage.getItem('token');
-                const newUser = JSON.parse(localStorage.getItem('user'));
+            if (event.key === 'token' || event.key === 'user') {
+                const newToken = getInitialToken();
+                const newUser = getInitialUser();
                 setAuthState({ token: newToken, user: newUser, isAuthenticated: !!newToken });
             }
         };
@@ -32,7 +47,7 @@ export const AuthProvider = ({ children }) => {
             isAuthenticated: true,
             user
         });
-        console.log("Login updated state:", { token, user });
+        console.log("Token set in localStorage:", token);
     };
 
     const logout = () => {

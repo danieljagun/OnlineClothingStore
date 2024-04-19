@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchItems } from '../services/ApiService';
 import { useAuth } from '../context/authContext';
 import { useCart } from '../context/CartContext';
@@ -38,18 +39,21 @@ function ItemList({ variant }) {
 
     return (
         <>
-            <h1 className="items-title">{variant === 'product' ? 'Product List' : 'Items Available'}</h1>
+            <h1 className="items-title">{variant === 'product' ? 'Product List' : 'Items Available, Discounts Available!'}</h1>
             <div className="item-container">
-            {Array.isArray(items) && items.map(item => (
-                <div key={item._id} className="item-card">
-                    <h3>{item.title}</h3>
-                    <img src={item.image} alt={item.title}/>
-                    <p>Manufacturer: {item.manufacturer}</p>
-                    <p>Price: ${item.price}</p>
-                    <button onClick={() => handleAddToCart(item)}>Add to Cart</button>
-                </div>
-            ))}
-        </div>
+                {Array.isArray(items) && items.map(item => (
+                    <div key={item._id} className="item-card">
+                        <h3><Link to={`/items/${item._id}`}>{item.title}</Link></h3>
+                        <p style={{ fontStyle: 'italic' }}>{item.category}</p>
+                        <Link to={`/items/${item._id}`}>
+                            <img src={item.image} alt={item.title}/>
+                        </Link>
+                        <p>Manufacturer: {item.manufacturer}</p>
+                        <p>Price: ${item.price}</p>
+                        <button onClick={() => handleAddToCart(item)}>Add to Cart</button>
+                    </div>
+                ))}
+            </div>
         </>
     );
 }

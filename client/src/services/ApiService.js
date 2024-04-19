@@ -1,15 +1,16 @@
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-axios.interceptors.request.use(function (config) {
 
+axios.interceptors.request.use(function (config) {
+    // Paths that do not require the Authorization header
     const noAuthNeeded = [
         { method: 'GET', path: '/items' },
-        { method: 'POST', path: '/orders' }
     ];
 
+    // Check if the current request should have no Authorization header
     const isNoAuthNeeded = noAuthNeeded.some(rule =>
-        config.url.includes(rule.path) && config.method.toLowerCase() === rule.method.toLowerCase()
+        config.url.endsWith(rule.path) && config.method.toLowerCase() === rule.method.toLowerCase()
     );
 
     if (isNoAuthNeeded) {
@@ -19,16 +20,15 @@ axios.interceptors.request.use(function (config) {
 
     return config;
 }, function (error) {
-
     return Promise.reject(error);
 });
 
 // Items
-export const fetchItems = (token) => {
-    return axios.get(`${API_URL}/items`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const fetchItems = (searchParams = {}) => {
+    const queryString = new URLSearchParams(searchParams).toString();
+    return axios.get(`${API_URL}/items?${queryString}`);
 };
+
 export const fetchItemById = (id) => axios.get(`${API_URL}/items/${id}`);
 export const createItem = (itemData, token) => {
     return axios.post(`${API_URL}/items`, itemData, {
@@ -48,12 +48,14 @@ export const fetchOrders = (token) => {
         headers: { Authorization: `Bearer ${token}` }
     });
 };
-export const createOrder = (orderData) => {
-    return axios.post(`${API_URL}/orders`, orderData)
-        .catch(error => {
-            console.error("Error creating order:", error.response);
-            throw error;
-        });
+
+export const createOrder = (orderData, token) => {
+    return axios.post(`${API_URL}/orders`, orderData, {
+        headers: { Authorization: `Bearer ${token}` }
+    }).catch(error => {
+        console.error("Error creating order:", error.response);
+        throw error;
+    });
 };
 
 // Reviews

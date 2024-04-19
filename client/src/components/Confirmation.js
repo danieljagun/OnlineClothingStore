@@ -8,7 +8,7 @@ function Confirmation() {
     return (
         <div>
             <h1>Order Confirmation</h1>
-            <p>Thank you for your order, {orderDetails.email}!</p>
+            <p>Thank you for your order, email with Order ID will be sent shortly! {orderDetails.email}</p>
         </div>
     );
 }

@@ -1,19 +1,43 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { Types: { ObjectId } } = require('mongoose');
 const Order = require('../models/Order');
 const authenticate = require("../middleware/authenticate");
+const nodemailer = require('nodemailer');
 const responseFactory = require('../config/responseFactory');
-const Mailjet = require('node-mailjet');
 const { validatePaymentDetails } = require('../config/validation');
 const isAdmin = require("../middleware/isAdmin");
 
-// Initialize Mailjet client
-const mailjet = Mailjet.apiConnect(
-    process.env.MAILJET_API_KEY,
-    process.env.MAILJET_API_SECRET
-);
+// Setup NodeMailer transport
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+
+// Define a function to send order confirmation email using NodeMailer
+const sendOrderConfirmationEmail = async (email, orderId) => {
+    const mailOptions = {
+        from: 'your-email@gmail.com', // Replace with your email address
+        to: email,
+        subject: 'Order Confirmation',
+        text: `Your order with ID ${orderId} has been successfully processed.`,
+        html: `<p>Your order with ID <strong>${orderId}</strong> has been successfully processed.</p>`
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully');
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        throw new Error('Failed to send order confirmation email');
+    }
+};
 
 const isValidObjectId = (id) => {
     const { ObjectId } = require('mongoose').Types;
@@ -60,6 +84,10 @@ router.post('/', async (req, res) => {
         });
 
         const savedOrder = await order.save();
+
+        /// Send order confirmation email
+        await sendOrderConfirmationEmail(email, savedOrder._id);
+
         res.status(201).json(responseFactory.success(savedOrder, "Order created successfully"));
     } catch (error) {
         console.error("Order processing error:", error);
@@ -93,13 +121,19 @@ router.post('/test', async (req, res) => {
     }
 });
 
-// Get all orders - Admin only
+// Get all orders with user and item details - Admin only
 router.get('/', authenticate, isAdmin, async (req, res) => {
     try {
-        const orders = await Order.find({});
+        const orders = await Order.find({})
+            .populate('user', 'username email')
+            .populate({
+                path: 'items.item',
+                model: 'Item',
+                select: 'title price'
+            });
         res.json(orders);
     } catch (error) {
-        res.status(500).json({ message: "Error fetching orders." });
+        res.status(500).json({ message: "Error fetching orders.", error });
     }
 });
 

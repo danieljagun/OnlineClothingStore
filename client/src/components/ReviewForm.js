@@ -4,7 +4,7 @@ import { useAuth } from '../context/authContext';
 
 function ReviewForm({ itemId }) {
     const [reviewData, setReviewData] = useState({
-        rating: '',
+        rating: '3',  // Setting default rating
         comment: ''
     });
     const { user, token } = useAuth();
@@ -17,13 +17,14 @@ function ReviewForm({ itemId }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!token) {
-            setError('You must be logged in to post a review.');
+            setError('Please log in to post a review.');
             return;
         }
         try {
             await postReview({ ...reviewData, item: itemId, user: user._id }, token);
+            setReviewData({ rating: '3', comment: '' });  // Reset form to default rating
+            setError('');
             alert('Review submitted successfully!');
-            setReviewData({ rating: '', comment: '' });
         } catch (error) {
             setError('Failed to submit review: ' + error.message);
             console.error('Error submitting review:', error);
@@ -37,7 +38,6 @@ function ReviewForm({ itemId }) {
                 <label>
                     Rating:
                     <select name="rating" value={reviewData.rating} onChange={handleChange}>
-                        <option value="">Select a Rating</option>
                         <option value="1">1 - Poor</option>
                         <option value="2">2 - Fair</option>
                         <option value="3">3 - Good</option>
@@ -50,7 +50,7 @@ function ReviewForm({ itemId }) {
                     <textarea name="comment" value={reviewData.comment} onChange={handleChange} />
                 </label>
                 <button type="submit">Submit Review</button>
-                {error && <p>{error}</p>}
+                {error && <p className="error">{error}</p>}
             </form>
         </div>
     );

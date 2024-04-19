@@ -20,9 +20,11 @@ function SearchItems() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
+        const filteredParams = Object.fromEntries(
+            Object.entries(searchParams).filter(([_, value]) => value.trim() !== '')
+        );
         try {
-
-            const response = await fetchItems(searchParams);
+            const response = await fetchItems(filteredParams);
             setItems(response.data.data);
             setLoading(false);
         } catch (error) {
@@ -58,6 +60,7 @@ function SearchItems() {
                 />
                 <select name="sort" value={searchParams.sort} onChange={handleInputChange}>
                     <option value="price">Price</option>
+                    <option value="-price">Price Desc</option>
                     <option value="manufacturer">Manufacturer</option>
                 </select>
                 <button type="submit">Search</button>

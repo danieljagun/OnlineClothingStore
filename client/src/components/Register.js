@@ -24,7 +24,7 @@ function Register() {
         registerUser(userData)
             .then(response => {
                 login(response.data.token, response.data.user);
-                navigate('/dashboard');
+                navigate('/');
                 alert('Registration successful!');
             })
             .catch(error => {
